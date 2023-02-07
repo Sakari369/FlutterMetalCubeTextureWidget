@@ -130,13 +130,13 @@ class RenderToTextureControllerMacOS {
         case "setAnimationVelocity":
             if let velocity = args?["velocity"] as? NSNumber {
                 let value = velocity.floatValue;
-                self.renderer.rotationVelocity = value * 0.0001
+                self.renderer.rotationVelocity = value * 0.01
                 NSLog("Set velocity to \(value)")
             }
             break
             
         case "getAnimationVelocity":
-            result(self.renderer.rotationVelocity * 10000);
+            result(self.renderer.rotationVelocity * 100);
             break
             
         default:
