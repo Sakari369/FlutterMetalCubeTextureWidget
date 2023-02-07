@@ -1,6 +1,6 @@
 // Copyright (c) 2023 Sumo Apps.
 //
-// Renders an animated cube to a texture.
+// Renders an animated cube with Metal to a texture.
 
 import Foundation
 import Metal
@@ -116,7 +116,7 @@ class CubeRenderer: NSObject {
     
     var rotation:Float = 0
     var rotationPhase:Float = 0.0;
-    var rotationVelocity:Float = 0.005;
+    var rotationVelocity:Float = 1.0;
     
     var scaling:SIMD3<Float> = [
         0.8, 0.8, 0.8
@@ -130,6 +130,9 @@ class CubeRenderer: NSObject {
     
     // Continue running rendering ?
     var running = true
+    
+    var clock = ContinuousClock()
+    var lastInstant:ContinuousClock.Instant = ContinuousClock.now
     
     init(metalDevice: MTLDevice) {
         self.device = metalDevice
@@ -206,6 +209,13 @@ class CubeRenderer: NSObject {
             return
         }
         
+        let timeNow = self.clock.now
+        let frameDuration = self.lastInstant.duration(to: timeNow)
+        let frameTimeUs = frameDuration.components.attoseconds / 1_000_000_000_000
+        let fps:Float = Float(1_000_000 / frameTimeUs)
+        
+        print("frametime = \(frameTimeUs) fps = \(fps)")
+        
         // Create the command buffer for this frame.
         guard let commandBuf = self.commandQueue.makeCommandBuffer() else {
             fatalError("Could not create command buffer")
@@ -225,11 +235,14 @@ class CubeRenderer: NSObject {
                                         znear: 0.0, zfar: 1.0))
         
         // Run animation logic.
-        self.rotationPhase += self.rotationVelocity;
-        if (self.rotationPhase >= 2*Float.pi) {
+        let phaseDelta = self.rotationVelocity  / fps;
+        self.rotationPhase += phaseDelta;
+        
+        let tau = Float.pi * 2;
+        if (self.rotationPhase >= tau) {
             self.rotationPhase = 0.0
         } else if (self.rotationPhase < 0.0) {
-            self.rotationPhase = 2*Float.pi
+            self.rotationPhase = tau
         }
         
         self.rotation = self.rotationPhase
@@ -274,5 +287,6 @@ class CubeRenderer: NSObject {
         commandBuf.commit()
         
         self.elapsedFrames += 1;
+        self.lastInstant = timeNow
     }
 }
