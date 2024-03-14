@@ -1,4 +1,5 @@
 // Copyright (c) 2023 Sumo Apps.
+// Modified by VisualPT
 
 // Test case for rendering with Metal code to a native metal texture, and setting up
 // display inside a Flutter Texture widget.
@@ -14,15 +15,18 @@ let DEF_TEXTURE_SIZE = 720
 // Name of the flutter plugin used to register this code to the flutter side.
 let FLUTTER_PLUGIN_NAME = "Sumo_CubeRenderApp"
 
-class RenderToTextureControllerIOS {
+class VPTVideoRenderer {
     // Reference to main flutter view controller.
     let flutterViewController: FlutterViewController
     
     // The renderer class used to render to a texture.
     var renderer: CubeRenderer
-    
+
     // Metal device used to render with.
     var device: MTLDevice!
+
+    // The session used to capture video frames.
+    var session: VPTVideoSession!
     
     // Reference to the Flutter texture registry.
     // Have to register the created texture with the flutter registry,
@@ -43,9 +47,9 @@ class RenderToTextureControllerIOS {
     // Link to the currently active display.
     var displayLink: CADisplayLink?
     
-    // Draw the contents of the texture.
-    @objc func draw(displayLink: CADisplayLink) {
-        self.renderer.draw()
+    // Render the contents of the texture.
+    @objc func render(displayLink: CADisplayLink) {
+        self.renderer.render()
         
         // Notify that the texture was updated.
         if let textureId = self.flutterTexture?.flutterTextureId {
@@ -55,7 +59,7 @@ class RenderToTextureControllerIOS {
     
     // Sets up the Main render loop for rendering with the shaders to the target texture.
     func setupRenderLoopDisplayLink() -> CADisplayLink {
-        let displayLink = CADisplayLink(target: self, selector: #selector(self.draw))
+        let displayLink = CADisplayLink(target: self, selector: #selector(self.render))
         displayLink.add(to: .main, forMode: .common)
         
         return displayLink
@@ -111,7 +115,23 @@ class RenderToTextureControllerIOS {
         case "getAnimationVelocity":
             result(self.renderer.rotationVelocity * 100);
             break
-            
+
+        case "load":
+            // Initialize the video session.
+            self.session = VPTVideoSession(delegate: self)
+            self.session?.frameOrientation = .portrait
+            break
+
+        case "start":
+            // Start the video session.
+            self.session?.start()
+            break
+
+        case "stop":
+            // Stop the video session.
+            self.session?.stop()
+            break
+
         default:
             result(FlutterMethodNotImplemented)
             break
@@ -159,3 +179,21 @@ class RenderToTextureControllerIOS {
         methodChannel.setMethodCallHandler(self.methodCallHandler)
     }
 }
+
+extension VPTVideoRenderer: VPTVideoSessionDelegate {
+     func vptVideoSession(_ session: VPTVideoSession, didReceiveFrameAsTextures textures: [MTLTexture], withTimestamp timestamp: Double) {
+         self.texture = textures[0]
+     }
+    
+     func vptVideoSession(_ session: VPTVideoSession, didUpdateState state: VPTVideoSessionState, error: VPTVideoSessionError?) {
+         session.frameOrientation = .portrait
+         if error == .captureSessionRuntimeError {
+             /**
+              *  In this app we are going to ignore capture session runtime errors
+              */
+             cameraSession.start()
+         }
+        
+         NSLog("Session changed state to \(state) with error: \(error?.localizedDescription ?? "None").")
+     }
+ }
