@@ -6,58 +6,9 @@ import Foundation
 import Metal
 import simd
 
-func makeTranslationMatrix(tx: Float, ty: Float, tz: Float) -> simd_float4x4 {
-    var matrix = matrix_identity_float4x4
-    
-    matrix[3, 0] = tx
-    matrix[3, 1] = ty
-    matrix[3, 2] = tz
-    
-    return matrix
-}
-
-func makeRotationMatrix(angle: Float) -> simd_float4x4 {
-    let rows = [
-        simd_float4(cos(angle),  0, sin(angle), 0),
-        simd_float4(0,           1, 0,          0),
-        simd_float4(-sin(angle), 0, cos(angle), 0),
-        simd_float4(0,           0, 0,          1)
-    ]
-    
-    return float4x4(rows: rows)
-}
-
-func makeScaleMatrix(xs: Float, ys: Float, zs: Float) -> simd_float4x4 {
-    let rows = [
-        simd_float4(xs, 0,  0,   0),
-        simd_float4(0,  ys, 0,   0),
-        simd_float4(0,  0,  zs,  0),
-        simd_float4(0,  0,  0,   1)
-    ]
-    
-    return float4x4(rows: rows)
-}
-
-func makePerspectiveProjectionMatrix(fov: Float, aspectRatio: Float, nearPlane: Float, farPlane: Float) -> simd_float4x4 {
-    let sy = 1 / tan(fov * 0.5)
-    let sx = sy / aspectRatio
-    let zRange = farPlane - nearPlane
-    let sz = -(farPlane + nearPlane) / zRange
-    let tz = -2 * farPlane * nearPlane / zRange;
-    
-    let rows = [
-        simd_float4(sx, 0,  0,   0),
-        simd_float4(0,  sy, 0,   0),
-        simd_float4(0,  0,  sz, -1),
-        simd_float4(0,  0,  tz,  1)
-    ]
-    
-    return float4x4(rows: rows)
-}
-
 let DEF_VIEWPORT_SIZE = 720
 
-class CubeRenderer: NSObject {
+class TextureRenderer: NSObject {
     // Reference to the metal device.
     var device:MTLDevice
     
@@ -109,18 +60,18 @@ class CubeRenderer: NSObject {
         viewMatrix: matrix_identity_float4x4
     )
    
-    // Cube transformation properties.
-    var translation:SIMD3<Float> = [
-        0, 0.0, 0.0,
-    ]
+    // // Cube transformation properties.
+    // var translation:SIMD3<Float> = [
+    //     0, 0.0, 0.0,
+    // ]
     
-    var rotation:Float = 0
-    var rotationPhase:Float = 0.0;
-    var rotationVelocity:Float = 1.0;
+    // var rotation:Float = 0
+    // var rotationPhase:Float = 0.0;
+    // var rotationVelocity:Float = 1.0;
     
-    var scaling:SIMD3<Float> = [
-        0.8, 0.8, 0.8
-    ]
+    // var scaling:SIMD3<Float> = [
+    //     0.8, 0.8, 0.8
+    // ]
     
     // Number of rendered frames.
     var elapsedFrames:Float = 0
@@ -139,36 +90,37 @@ class CubeRenderer: NSObject {
         
         let aspectRatio = Float(self.viewportSize.x / self.viewportSize.y)
         
-        self.uniforms.projectionMatrix = makePerspectiveProjectionMatrix(fov: 75.0,
-                                                                             aspectRatio: aspectRatio,
-                                                                             nearPlane: 1, farPlane: 10)
+        // TODO: Set up connection to MetalCamera texture callback
+        // self.uniforms.projectionMatrix = makePerspectiveProjectionMatrix(fov: 75.0,
+        //                                                                      aspectRatio: aspectRatio,
+        //                                                                      nearPlane: 1, farPlane: 10)
         
-        self.uniforms.viewMatrix = makeTranslationMatrix(tx: 0.0, ty: 0.0, tz: -6.0)
+        // self.uniforms.viewMatrix = makeTranslationMatrix(tx: 0.0, ty: 0.0, tz: -6.0)
         
-        // Make a cube.
-        let c1:SIMD4<Float> = [0.15, 0.25, 0.7, 1.0]
-        let c2:SIMD4<Float> = [0.9, 0.2, 0.2, 1.0]
+        // // Make a cube.
+        // let c1:SIMD4<Float> = [0.15, 0.25, 0.7, 1.0]
+        // let c2:SIMD4<Float> = [0.9, 0.2, 0.2, 1.0]
         
-        let A = Vertex(position: [-1.0, 1.0, 1.0], color: c2)
-        let B = Vertex(position: [-1.0,-1.0, 1.0], color: c1)
-        let C = Vertex(position: [ 1.0,-1.0, 1.0], color: c1)
-        let D = Vertex(position: [ 1.0, 1.0, 1.0], color: c2)
+        // let A = Vertex(position: [-1.0, 1.0, 1.0], color: c2)
+        // let B = Vertex(position: [-1.0,-1.0, 1.0], color: c1)
+        // let C = Vertex(position: [ 1.0,-1.0, 1.0], color: c1)
+        // let D = Vertex(position: [ 1.0, 1.0, 1.0], color: c2)
         
-        let Q = Vertex(position: [-1.0, 1.0,-1.0], color: c2)
-        let R = Vertex(position: [ 1.0, 1.0,-1.0], color: c2)
-        let S = Vertex(position: [-1.0,-1.0,-1.0], color: c1)
-        let T = Vertex(position: [ 1.0,-1.0,-1.0], color: c1)
+        // let Q = Vertex(position: [-1.0, 1.0,-1.0], color: c2)
+        // let R = Vertex(position: [ 1.0, 1.0,-1.0], color: c2)
+        // let S = Vertex(position: [-1.0,-1.0,-1.0], color: c1)
+        // let T = Vertex(position: [ 1.0,-1.0,-1.0], color: c1)
         
-        self.vertices = [
-          A,B,C ,A,C,D,   // Front.
-          R,T,S ,Q,R,S,   // Back.
+        // self.vertices = [
+        //   A,B,C ,A,C,D,   // Front.
+        //   R,T,S ,Q,R,S,   // Back.
           
-          Q,S,B ,Q,B,A,   // Left.
-          D,C,T ,D,T,R,   // Right.
+        //   Q,S,B ,Q,B,A,   // Left.
+        //   D,C,T ,D,T,R,   // Right.
           
-          Q,A,D ,Q,D,R,   // Top.
-          B,S,T ,B,T,C    // Bot.
-        ]
+        //   Q,A,D ,Q,D,R,   // Top.
+        //   B,S,T ,B,T,C    // Bot.
+        // ]
         
         // Get the default shader library.
         let shaderLib = self.device.makeDefaultLibrary()
@@ -234,51 +186,52 @@ class CubeRenderer: NSObject {
                                         height: Double(self.viewportSize.y),
                                         znear: 0.0, zfar: 1.0))
         
-        // Run animation logic.
-        let phaseDelta = self.rotationVelocity  / fps;
-        self.rotationPhase += phaseDelta;
+        // TODO: Run the MetalCamera texture here
+        // // Run animation logic.
+        // let phaseDelta = self.rotationVelocity  / fps;
+        // self.rotationPhase += phaseDelta;
         
-        let tau = Float.pi * 2;
-        if (self.rotationPhase >= tau) {
-            self.rotationPhase = 0.0
-        } else if (self.rotationPhase < 0.0) {
-            self.rotationPhase = tau
-        }
+        // let tau = Float.pi * 2;
+        // if (self.rotationPhase >= tau) {
+        //     self.rotationPhase = 0.0
+        // } else if (self.rotationPhase < 0.0) {
+        //     self.rotationPhase = tau
+        // }
         
-        self.rotation = self.rotationPhase
+        // self.rotation = self.rotationPhase
         
-        //xself.scaling.x = 0.5 * cos(self.rotationPhase)
+        // //xself.scaling.x = 0.5 * cos(self.rotationPhase)
         
-        let scaleMat = makeScaleMatrix(xs: self.scaling.x,
-                                       ys: self.scaling.y,
-                                       zs: self.scaling.z);
+        // let scaleMat = makeScaleMatrix(xs: self.scaling.x,
+        //                                ys: self.scaling.y,
+        //                                zs: self.scaling.z);
         
-        let rotationMat = makeRotationMatrix(angle: self.rotation)
+        // let rotationMat = makeRotationMatrix(angle: self.rotation)
         
-        let translationMat = makeTranslationMatrix(tx: self.translation.x,
-                                                   ty: self.translation.y,
-                                                   tz: self.translation.z)
+        // let translationMat = makeTranslationMatrix(tx: self.translation.x,
+        //                                            ty: self.translation.y,
+        //                                            tz: self.translation.z)
         
-        self.uniforms.modelMatrix = scaleMat * rotationMat * translationMat;
-        self.uniforms.viewMatrix = makeTranslationMatrix(tx: 0,
-                                                         ty: 1.2 * sin(self.rotationPhase),
-                                                         tz: -6)
+        // self.uniforms.modelMatrix = scaleMat * rotationMat * translationMat;
+        // self.uniforms.viewMatrix = makeTranslationMatrix(tx: 0,
+        //                                                  ty: 1.2 * sin(self.rotationPhase),
+        //                                                  tz: -6)
         
-        // Set vertices.
-        // Under 4kb so can set without a buffer.
-        encoder.setVertexBytes(self.vertices,
-                               length: MemoryLayout<Vertex>.stride * self.vertices.count,
-                               index: VertexInputIndex.vertices.rawValue)
+        // // Set vertices.
+        // // Under 4kb so can set without a buffer.
+        // encoder.setVertexBytes(self.vertices,
+        //                        length: MemoryLayout<Vertex>.stride * self.vertices.count,
+        //                        index: VertexInputIndex.vertices.rawValue)
         
-        // Set uniforms.
-        encoder.setVertexBytes(&self.uniforms,
-                               length: MemoryLayout<Uniforms>.size,
-                               index: VertexInputIndex.uniforms.rawValue)
+        // // Set uniforms.
+        // encoder.setVertexBytes(&self.uniforms,
+        //                        length: MemoryLayout<Uniforms>.size,
+        //                        index: VertexInputIndex.uniforms.rawValue)
         
-        // Draw the cube.
-        encoder.drawPrimitives(type: .triangle,
-                               vertexStart: 0,
-                               vertexCount: self.vertices.count)
+        // // Draw the cube.
+        // encoder.drawPrimitives(type: .triangle,
+        //                        vertexStart: 0,
+        //                        vertexCount: self.vertices.count)
         
         // End encoding rendering commands for this frame.
         encoder.endEncoding()
