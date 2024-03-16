@@ -13,20 +13,23 @@ import Metal
 let DEF_TEXTURE_SIZE = 720
 
 // Name of the flutter plugin used to register this code to the flutter side.
-let FLUTTER_PLUGIN_NAME = "Sumo_CubeRenderApp"
+let FLUTTER_PLUGIN_NAME = "VPTTextureRender"
 
 class VPTVideoRenderer {
+    // The ID for the texture that will be produced. Placeholder type for compilation.
+    private var textureID: Int64 = 0
+    
     // Reference to main flutter view controller.
     let flutterViewController: FlutterViewController
     
     // The renderer class used to render to a texture.
-    var renderer: CubeRenderer
+    var renderer: TextureRenderer
 
     // Metal device used to render with.
     var device: MTLDevice!
 
     // The session used to capture video frames.
-    var session: VPTVideoSession!
+    var session: VPTVideoSession?
     
     // Reference to the Flutter texture registry.
     // Have to register the created texture with the flutter registry,
@@ -103,19 +106,6 @@ class VPTVideoRenderer {
             // Return the flutter texture id of the generated flutter texture.
             result(texture.flutterTextureId)
             break
-            
-        case "setAnimationVelocity":
-            if let velocity = args?["velocity"] as? NSNumber {
-                let value = velocity.floatValue;
-                self.renderer.rotationVelocity = value * 0.01
-                NSLog("Set velocity to \(value)")
-            }
-            break
-            
-        case "getAnimationVelocity":
-            result(self.renderer.rotationVelocity * 100);
-            break
-
         case "load":
             // Initialize the video session.
             self.session = VPTVideoSession(delegate: self)
@@ -170,7 +160,11 @@ class VPTVideoRenderer {
         }
         
         // Create the renderer.
-        self.renderer = CubeRenderer(metalDevice: self.device)
+        guard let renderer = TextureRenderer(metalDevice: self.device)
+        else {
+            fatalError("Could not create TextureRenderer")
+        }
+        self.renderer = renderer
         
         // Setup the rendering loop via display link callback.
         self.displayLink = setupRenderLoopDisplayLink()
@@ -179,10 +173,9 @@ class VPTVideoRenderer {
         methodChannel.setMethodCallHandler(self.methodCallHandler)
     }
 }
-
 extension VPTVideoRenderer: VPTVideoSessionDelegate {
      func vptVideoSession(_ session: VPTVideoSession, didReceiveFrameAsTextures textures: [MTLTexture], withTimestamp timestamp: Double) {
-         self.texture = textures[0]
+         self.renderer.renderTargetTexture = textures[0]
      }
     
      func vptVideoSession(_ session: VPTVideoSession, didUpdateState state: VPTVideoSessionState, error: VPTVideoSessionError?) {
@@ -191,7 +184,7 @@ extension VPTVideoRenderer: VPTVideoSessionDelegate {
              /**
               *  In this app we are going to ignore capture session runtime errors
               */
-             cameraSession.start()
+             self.session?.start()
          }
         
          NSLog("Session changed state to \(state) with error: \(error?.localizedDescription ?? "None").")

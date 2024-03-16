@@ -8,11 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
-		3B0454ED29702814006F3060 /* RenderToTextureControllerIOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0454E929702814006F3060 /* RenderToTextureControllerIOS.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
-		3B51CBA929910A2900CC3C55 /* CubeRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B51CBA629910A2900CC3C55 /* CubeRenderer.swift */; };
-		3B51CBAA29910A2900CC3C55 /* CubeShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 3B51CBA729910A2900CC3C55 /* CubeShader.metal */; };
 		3B51CBB329911BC200CC3C55 /* FlutterMetalTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B51CBB229911BC200CC3C55 /* FlutterMetalTexture.swift */; };
+		71271ED32BA4840D00B2718B /* VideoShader.metal in Sources */ = {isa = PBXBuildFile; fileRef = 71271ECE2BA4840D00B2718B /* VideoShader.metal */; };
+		71271ED42BA4840D00B2718B /* VPTVideoCaptureDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71271ED22BA4840D00B2718B /* VPTVideoCaptureDevice.swift */; };
+		71271ED52BA4840D00B2718B /* VPTVideoRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71271ECF2BA4840D00B2718B /* VPTVideoRenderer.swift */; };
+		71271ED62BA4840D00B2718B /* TextureRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71271ECD2BA4840D00B2718B /* TextureRenderer.swift */; };
+		71271ED72BA4840D00B2718B /* VPTVideoSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71271ED02BA4840D00B2718B /* VPTVideoSession.swift */; };
+		71271ED82BA4840D00B2718B /* VPTVideoSessionTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71271ED12BA4840D00B2718B /* VPTVideoSessionTypes.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
@@ -35,11 +38,14 @@
 /* Begin PBXFileReference section */
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
-		3B0454E929702814006F3060 /* RenderToTextureControllerIOS.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RenderToTextureControllerIOS.swift; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
-		3B51CBA629910A2900CC3C55 /* CubeRenderer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CubeRenderer.swift; path = ../../src/CubeRenderer.swift; sourceTree = "<group>"; };
-		3B51CBA729910A2900CC3C55 /* CubeShader.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; name = CubeShader.metal; path = ../../src/CubeShader.metal; sourceTree = "<group>"; };
 		3B51CBB229911BC200CC3C55 /* FlutterMetalTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FlutterMetalTexture.swift; sourceTree = "<group>"; };
+		71271ECD2BA4840D00B2718B /* TextureRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TextureRenderer.swift; path = /Users/crich/development/github/FlutterMetalCubeTextureWidget/ios/Runner/TextureRenderer.swift; sourceTree = "<absolute>"; };
+		71271ECE2BA4840D00B2718B /* VideoShader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; name = VideoShader.metal; path = /Users/crich/development/github/FlutterMetalCubeTextureWidget/ios/Runner/VideoShader.metal; sourceTree = "<absolute>"; };
+		71271ECF2BA4840D00B2718B /* VPTVideoRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VPTVideoRenderer.swift; path = /Users/crich/development/github/FlutterMetalCubeTextureWidget/ios/Runner/VPTVideoRenderer.swift; sourceTree = "<absolute>"; };
+		71271ED02BA4840D00B2718B /* VPTVideoSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VPTVideoSession.swift; path = /Users/crich/development/github/FlutterMetalCubeTextureWidget/ios/Runner/VPTVideoSession.swift; sourceTree = "<absolute>"; };
+		71271ED12BA4840D00B2718B /* VPTVideoSessionTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VPTVideoSessionTypes.swift; path = /Users/crich/development/github/FlutterMetalCubeTextureWidget/ios/Runner/VPTVideoSessionTypes.swift; sourceTree = "<absolute>"; };
+		71271ED22BA4840D00B2718B /* VPTVideoCaptureDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VPTVideoCaptureDevice.swift; path = /Users/crich/development/github/FlutterMetalCubeTextureWidget/ios/Runner/VPTVideoCaptureDevice.swift; sourceTree = "<absolute>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
@@ -95,9 +101,6 @@
 			isa = PBXGroup;
 			children = (
 				3B51CBB229911BC200CC3C55 /* FlutterMetalTexture.swift */,
-				3B51CBA629910A2900CC3C55 /* CubeRenderer.swift */,
-				3B51CBA729910A2900CC3C55 /* CubeShader.metal */,
-				3B0454E929702814006F3060 /* RenderToTextureControllerIOS.swift */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
@@ -106,6 +109,12 @@
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				71271ECD2BA4840D00B2718B /* TextureRenderer.swift */,
+				71271ECE2BA4840D00B2718B /* VideoShader.metal */,
+				71271ED22BA4840D00B2718B /* VPTVideoCaptureDevice.swift */,
+				71271ECF2BA4840D00B2718B /* VPTVideoRenderer.swift */,
+				71271ED02BA4840D00B2718B /* VPTVideoSession.swift */,
+				71271ED12BA4840D00B2718B /* VPTVideoSessionTypes.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -219,12 +228,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B51CBAA29910A2900CC3C55 /* CubeShader.metal in Sources */,
+				71271ED32BA4840D00B2718B /* VideoShader.metal in Sources */,
+				71271ED82BA4840D00B2718B /* VPTVideoSessionTypes.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
-				3B0454ED29702814006F3060 /* RenderToTextureControllerIOS.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				71271ED52BA4840D00B2718B /* VPTVideoRenderer.swift in Sources */,
+				71271ED62BA4840D00B2718B /* TextureRenderer.swift in Sources */,
+				71271ED72BA4840D00B2718B /* VPTVideoSession.swift in Sources */,
 				3B51CBB329911BC200CC3C55 /* FlutterMetalTexture.swift in Sources */,
-				3B51CBA929910A2900CC3C55 /* CubeRenderer.swift in Sources */,
+				71271ED42BA4840D00B2718B /* VPTVideoCaptureDevice.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -318,7 +330,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.visualPT.flutterMetalTexture;
+				PRODUCT_BUNDLE_IDENTIFIER = com.visualPT.vptVideo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -453,7 +465,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.visualPT.flutterMetalTexture;
+				PRODUCT_BUNDLE_IDENTIFIER = com.visualPT.vptVideo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -480,7 +492,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.visualPT.flutterMetalTexture;
+				PRODUCT_BUNDLE_IDENTIFIER = com.visualPT.vptVideo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
