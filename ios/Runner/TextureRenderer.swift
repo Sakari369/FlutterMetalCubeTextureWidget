@@ -119,7 +119,7 @@ class TextureRenderer: NSObject {
 
          autoreleasepool {
              guard
-                 var texture = renderTargetTexture,
+                 let texture = renderTargetTexture,
                  let commandBuffer = commandQueue?.makeCommandBuffer()
              else {
                  _ = semaphore.signal()
@@ -153,11 +153,14 @@ class TextureRenderer: NSObject {
                 guard 
                     let unwrappedSelf = self 
                 else { return }
-                    //TODO: unwrappedSelf.didRenderTexture(texture, withCommandBuffer: buffer, device: device)
+                    //unwrappedSelf.didRenderTexture(texture, withCommandBuffer: buffer, device: device)
                 unwrappedSelf.semaphore.signal()
             }
             // Commit the command buffer to the GPU.
             commandBuffer.commit()
+
+            self.elapsedFrames += 1;
+            self.lastInstant = timeNow
             }
     }
 }

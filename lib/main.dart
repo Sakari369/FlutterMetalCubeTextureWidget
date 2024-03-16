@@ -20,25 +20,23 @@ const appBgColor = 0xFF383838;
 const buildInAnimLength = 2700;
 
 void main() {
-  runApp(const SumoCubeRenderApp());
+  runApp(const VPTVideoRendererApp());
 }
 
 // Displays and runs a triangle rendered with native code, displayed
 // inside a Flutter Texture widget.
-class SumoCubeRenderApp extends StatelessWidget {
-  const SumoCubeRenderApp({ super.key });
+class VPTVideoRendererApp extends StatelessWidget {
+  const VPTVideoRendererApp({super.key});
 
-  @override Widget build(BuildContext context) {
-
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Sumo Cube Render App',
       theme: ThemeData(
           primarySwatch: Colors.blue,
-
           textTheme: const TextTheme(
             bodyMedium: TextStyle(color: Colors.white),
-          )
-      ),
+          )),
 
       // Create the UI and initialize application.
       home: const CubeToTexture(),
@@ -48,22 +46,16 @@ class SumoCubeRenderApp extends StatelessWidget {
 
 // Widget for triangle to texture renderer.
 class CubeToTexture extends StatefulWidget {
-  const CubeToTexture({ super.key });
+  const CubeToTexture({super.key});
 
-  @override State<CubeToTexture> createState() => _CubeToTextureState();
+  @override
+  State<CubeToTexture> createState() => _CubeToTextureState();
 }
 
 // State for the triangle to texture renderer.
 //
-class _CubeToTextureState extends State<CubeToTexture> with TickerProviderStateMixin {
-  // Animation controller for scaling the layer.
-  late AnimationController _textureScaleAnimator;
-
-  @override void dispose() {
-    _textureScaleAnimator.dispose();
-    super.dispose();
-  }
-
+class _CubeToTextureState extends State<CubeToTexture>
+    with TickerProviderStateMixin {
   // Flutter texture id received from the flutter texture registry.
   // Backed up by a native texture.
   int? _flutterTextureId;
@@ -72,37 +64,26 @@ class _CubeToTextureState extends State<CubeToTexture> with TickerProviderStateM
   final int _textureWidth = 720;
   final int _textureHeight = 720;
 
-  // Animation velocity slider.
-  double _sliderVal = 0.0;
-
   // Create the communication channel to the native code.
-  static const MethodChannel _channel = MethodChannel('Sumo_CubeRenderApp');
+  static const MethodChannel _channel = MethodChannel('VPTTextureRender');
 
   // Called after initialization.
-  @override void initState() {
+  @override
+  void initState() {
     // Create the native Metal backed flutter texture.
     createFlutterTexture();
 
-    // Start texture scaling animation.
-    _textureScaleAnimator = AnimationController(
-        duration: const Duration(milliseconds: buildInAnimLength),
-        lowerBound: 0.0, upperBound: 1.0,
-        vsync: this)
-      ..forward();
-
     super.initState();
-
-    // Read in animation velocity value from the native code.
-    getAnimationVelocity();
   }
 
-  @override Widget build(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     if (_flutterTextureId != null) {
       // Display triangle in the texture widget.
       return triangleTextureView();
     } else {
       // Display loading screen while creating backend texture.
-      return const LoadingScreenWidget();
+      return LoadingScreenWidget(onPressed: () => load());
     }
   }
 
@@ -113,208 +94,146 @@ class _CubeToTextureState extends State<CubeToTexture> with TickerProviderStateM
 
     return Scaffold(
         backgroundColor: const Color(appBgColor),
-
-        body:
-        Container(
+        body: Container(
             alignment: Alignment.center,
 
             // Background gradient.
             decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-
-                  colors: [
-                    Colors.black,
-                    Color(appBgColor),
-                  ],
-                )
-            ),
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black,
+                Color(appBgColor),
+              ],
+            )),
 
             // Contain the widgets in a stack for freeform positioning and drawing on top of each other.
-            child:
-            Stack(
+            child: Stack(
                 alignment: Alignment.center,
                 clipBehavior: Clip.hardEdge,
                 fit: StackFit.loose,
                 textDirection: TextDirection.rtl,
-
-                children:
-                <Widget> [
-                  // Setup animation for scaling the Flutter texture towards the user.
-                  AnimatedBuilder(
-                    animation: _textureScaleAnimator,
-
-                    builder: (BuildContext context, Widget? child) {
-
-                      return Transform.scale(
-                        scale: _textureScaleAnimator.value,
-                        child: child,
-                      );
-                    },
-
-                    // Contain the Flutter texture in a square aspect ratio.
-                    child:
-                    AspectRatio(
-                      aspectRatio: 1,
-
-                      child:
-                      RepaintBoundary(
-
-                        // Contains the native texture backed Flutter texture.
-                        child:
-                        SizedBox(
-                            width: _textureWidth.toDouble(),
-                            height: _textureHeight.toDouble(),
-                            child: Texture(textureId: flutterTextureId!)
-                        ),
-                      ),
+                children: <Widget>[
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: RepaintBoundary(
+                      // Contains the native texture backed Flutter texture.
+                      child: SizedBox(
+                          width: _textureWidth.toDouble(),
+                          height: _textureHeight.toDouble(),
+                          child: Texture(textureId: flutterTextureId!)),
                     ),
-
                   ),
+
                   // Text array.
 
                   Stack(
                       clipBehavior: Clip.none,
                       alignment: Alignment.center,
-
-                      children:
-                      <Widget>[
+                      children: <Widget>[
                         // Animation for moving the text header 1.
                         TweenAnimationBuilder(
                             tween: Tween<double>(begin: -100, end: 0.0),
-                            duration: const Duration(milliseconds: buildInAnimLength + 30),
-
-                            builder:(BuildContext context, double tweenValue, Widget? child) {
-
+                            duration: const Duration(
+                                milliseconds: buildInAnimLength + 30),
+                            builder: (BuildContext context, double tweenValue,
+                                Widget? child) {
                               return Transform.translate(
                                   offset: Offset(tweenValue, 0.0),
-
-                                  child:
-                                  const Align(
+                                  child: const Align(
                                     alignment: Alignment(0.25, -0.83),
-
-                                    child:
-                                    Text('SumoRenderer',
+                                    child: Text('VPTVideo',
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontSize: 39,
                                           fontFamily: "Georgia",
-                                        )
-                                    ),
-                                  )
-                              );
-
-                            }
-                        ),
+                                        )),
+                                  ));
+                            }),
 
                         // Animation for moving the text header 2.
                         TweenAnimationBuilder(
                           tween: Tween<double>(begin: 150, end: 0.0),
-                          duration: const Duration(milliseconds: buildInAnimLength + 30),
-
-                          builder: (BuildContext context, double tweenValue, Widget? child) {
+                          duration: const Duration(
+                              milliseconds: buildInAnimLength + 30),
+                          builder: (BuildContext context, double tweenValue,
+                              Widget? child) {
                             return Transform.translate(
                               offset: Offset(tweenValue, 0.0),
-
-                              child:
-                              const Align(
+                              child: const Align(
                                 alignment: Alignment(0.65, -0.72),
-
-                                child:
-                                Text('Cube',
+                                child: Text('Renderer',
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       fontSize: 40,
                                       fontFamily: "Georgia",
-                                    )
-                                ),
+                                    )),
                               ),
-
                             );
                           },
                         ),
                         Positioned(
                             bottom: 29,
+                            child: Row(children: <Widget>[
+                              ElevatedButton(
+                                  onPressed: () =>
+                                      {print("Launching"), load(), start()},
+                                  child: const Text('Start')),
+                            ])),
+                      ]) // Stack.
+                ]) // Stack.
 
-                            child:
-                            Row(
-                                children:
-                                <Widget> [
-                                  const Text(
-                                      "velocity",
-                                      textAlign: TextAlign.center
-                                  ),
-
-                                  Slider(
-                                    value: _sliderVal,
-                                    label: _sliderVal.toString(),
-
-                                    min: 0.0,
-                                    max: 300.0,
-
-                                    onChanged: (double value) {
-                                      setState(() {
-                                        _sliderVal = value;
-                                        setAnimationVelocity(_sliderVal);
-                                      });
-                                    },
-                                  ),
-
-                                  Text(
-                                      _sliderVal.round().toString(),
-                                      textAlign: TextAlign.center
-                                  )
-
-                                ]
-                            )
-                        ),
-
-                      ]
-                  ) // Stack.
-
-                ]
-            ) // Stack.
-
-        )
-    );
+            ));
   }
 
   // Creates a flutter texture and stores the texture id got from the created flutter texture.
   Future<void> createFlutterTexture() async {
     // The flutter texture is backed by a native platform dependent texture, that is registered
     // on the native backend to the flutter texture registry.
-    var textureId = await _channel.invokeMethod("createFlutterTexture", {
-      "width": _textureWidth,
-      "height": _textureHeight
-    });
+    var textureId = await _channel.invokeMethod("createFlutterTexture",
+        {"width": _textureWidth, "height": _textureHeight});
 
     // Store received texture id from the flutter texture registry.
-    setState(() { _flutterTextureId = textureId; });
+    setState(() {
+      _flutterTextureId = textureId;
+    });
   }
 
-  // Sets the animation velocity parameter on the native side.
-  Future<void> setAnimationVelocity(double velocity) async {
-    _channel.invokeMethod("setAnimationVelocity", { "velocity": velocity });
+  Future<void> load() async {
+    print("Calling");
+    try {
+      await _channel.invokeMethod("load", null);
+    } catch (e) {
+      print("Error: $e");
+    }
+    ;
+    final data = await _channel.invokeMethod("load", null);
+
+    //await _channel.invokeMethod("start");
+    print("Data: $data");
   }
 
   // Gets the animation velocity parameter from the native side.
-  Future<void> getAnimationVelocity() async {
-    var velocity = await _channel.invokeMethod("getAnimationVelocity", null);
-    // Update slider value from animation velocity.
-    setState(() { _sliderVal = velocity; });
+  Future<void> start() async {}
+
+  // Gets the animation velocity parameter from the native side.
+  Future<void> stop() async {
+    await _channel.invokeMethod("stop");
   }
 }
 
 // Loading screen view widget for displaying while creating the
 // native flutter texture.
 class LoadingScreenWidget extends StatelessWidget {
+  final void Function()? onPressed;
   const LoadingScreenWidget({
+    required this.onPressed,
     Key? key,
   }) : super(key: key);
 
-  @override Widget build(BuildContext context) {
-
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: const Color(appBgColor),
 
@@ -324,28 +243,19 @@ class LoadingScreenWidget extends StatelessWidget {
             fit: StackFit.loose,
             clipBehavior: Clip.hardEdge,
             textDirection: TextDirection.rtl,
-
-            children:
-            <Widget> [
-
-              Container (
-                // Background gradient.
+            children: <Widget>[
+              Container(
+                  // Background gradient.
                   decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-
-                        colors: [
-                          Colors.black,
-                          Color(appBgColor),
-                        ],
-                      )
-                  )
-              ),
-
-            ]
-        )
-    );
-
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black,
+                  Color(appBgColor),
+                ],
+              ))),
+              ElevatedButton(onPressed: () => onPressed, child: Text("Load"))
+            ]));
   }
 }

@@ -18,10 +18,12 @@ public protocol VPTVideoSessionDelegate {
      Camera session did receive a new frame and converted it to an array of Metal textures. For instance, if the RGB pixel format was selected, the array will have a single texture, whereas if YCbCr was selected, then there will be two textures: the Y texture at index 0, and CbCr texture at index 1 (following the order in a sample buffer).
      
      - parameter session:                   Session that triggered the update
+     - parameter withPixelBuffer                           Pixel Buffer used to convert texture to FlutterTexture
+     - parameter textureCache:              Test
      - parameter didReceiveFrameAsTextures: Frame converted to an array of Metal textures
      - parameter withTimestamp:             Frame timestamp in seconds
      */
-    func vptVideoSession(_ session: VPTVideoSession, didReceiveFrameAsTextures: [MTLTexture], withTimestamp: Double)
+    func vptVideoSession(_ session: VPTVideoSession, withPixelBuffer: CVPixelBuffer, textureCache: CVMetalTextureCache, didReceiveFrameAsTextures: [MTLTexture], withTimestamp: Double)
     
     /**
      Camera session did update capture state
@@ -344,10 +346,23 @@ extension VPTVideoSession: AVCaptureVideoDataOutputSampleBufferDelegate {
         return (Double)(time.value) / (Double)(time.timescale);
     }
     
+    func extractPixelBuffer(from sampleBuffer: CMSampleBuffer) -> CVPixelBuffer? {
+        // Check if the sampleBuffer contains video data
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            print("Failed to extract pixel buffer from sample buffer.")
+            return nil
+        }
+        return pixelBuffer
+    }
+    
     public func captureOutput(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         do {
-            var textures: [MTLTexture]!
+            guard let pixelBuffer = extractPixelBuffer(from: sampleBuffer),
+                  let textureCache = textureCache else {
+                fatalError("No pixelBuffer or textureCache")
+            }
             
+            var textures: [MTLTexture]!
             switch pixelFormat {
             case .rgb:
                 let textureRGB = try texture(sampleBuffer: sampleBuffer, textureCache: textureCache)
@@ -357,10 +372,8 @@ extension VPTVideoSession: AVCaptureVideoDataOutputSampleBufferDelegate {
                 let textureCbCr = try texture(sampleBuffer: sampleBuffer, textureCache: textureCache, planeIndex: 1, pixelFormat: .rg8Unorm)
                 textures = [textureY, textureCbCr]
             }
-            
             let timestamp = try self.timestamp(sampleBuffer: sampleBuffer)
-            
-            delegate?.vptVideoSession(self, didReceiveFrameAsTextures: textures, withTimestamp: timestamp)
+            delegate?.vptVideoSession(self, withPixelBuffer: pixelBuffer, textureCache: textureCache, didReceiveFrameAsTextures: textures, withTimestamp: timestamp)
         }
         catch let error as VPTVideoSessionError {
             self.handleError(error)

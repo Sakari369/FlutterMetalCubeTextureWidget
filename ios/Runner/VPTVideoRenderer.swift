@@ -53,10 +53,12 @@ class VPTVideoRenderer {
     // Render the contents of the texture.
     @objc func render(displayLink: CADisplayLink) {
         self.renderer.render()
+
         
         // Notify that the texture was updated.
         if let textureId = self.flutterTexture?.flutterTextureId {
             self.flutterTextureRegistry!.textureFrameAvailable(textureId)
+            NSLog("textureId" + String(textureID))
         }
     }
     
@@ -107,17 +109,17 @@ class VPTVideoRenderer {
             result(texture.flutterTextureId)
             break
         case "load":
+            NSLog("Called Load")
             // Initialize the video session.
-            self.session = VPTVideoSession(delegate: self)
-            self.session?.frameOrientation = .portrait
-            break
-
+            return result(nil)
         case "start":
+            NSLog("Called Start")
             // Start the video session.
             self.session?.start()
             break
 
         case "stop":
+            NSLog("Called Stop")
             // Stop the video session.
             self.session?.stop()
             break
@@ -171,11 +173,15 @@ class VPTVideoRenderer {
         
         // Setup Flutter native channel method handler.
         methodChannel.setMethodCallHandler(self.methodCallHandler)
+
+        self.session = VPTVideoSession(delegate: self)
+        self.session?.frameOrientation = .portrait
+        self.session?.start()
     }
 }
 extension VPTVideoRenderer: VPTVideoSessionDelegate {
-     func vptVideoSession(_ session: VPTVideoSession, didReceiveFrameAsTextures textures: [MTLTexture], withTimestamp timestamp: Double) {
-         self.renderer.renderTargetTexture = textures[0]
+    func vptVideoSession(_ session: VPTVideoSession, withPixelBuffer pixelBuffer: CVPixelBuffer, textureCache: CVMetalTextureCache, didReceiveFrameAsTextures textures: [MTLTexture], withTimestamp timestamp: Double) {
+        self.flutterTexture = FlutterMetalTexture(device:self.device, textureCache: textureCache, width: DEF_TEXTURE_SIZE, height: DEF_TEXTURE_SIZE)
      }
     
      func vptVideoSession(_ session: VPTVideoSession, didUpdateState state: VPTVideoSessionState, error: VPTVideoSessionError?) {
