@@ -195,7 +195,7 @@ public final class VPTVideoSession: NSObject {
         if error.isStreamingError() {
             state = .error
         }
-
+        
         delegate?.vptVideoSession(self, didUpdateState: state, error: error)
     }
 
@@ -346,19 +346,15 @@ extension VPTVideoSession: AVCaptureVideoDataOutputSampleBufferDelegate {
         return (Double)(time.value) / (Double)(time.timescale);
     }
     
-    func extractPixelBuffer(from sampleBuffer: CMSampleBuffer) -> CVPixelBuffer? {
-        // Check if the sampleBuffer contains video data
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            print("Failed to extract pixel buffer from sample buffer.")
-            return nil
-        }
-        return pixelBuffer
-    }
-    
     public func captureOutput(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         do {
-            guard let pixelBuffer = extractPixelBuffer(from: sampleBuffer),
-                  let textureCache = textureCache else {
+            
+            // Check if the sampleBuffer contains video data
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+                fatalError("Failed to extract pixel buffer from sample buffer.")
+            }
+            
+            guard let textureCache = textureCache else {
                 fatalError("No pixelBuffer or textureCache")
             }
             

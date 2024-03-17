@@ -9,7 +9,7 @@ import Flutter
 // Provides a way to copy the metal texture contents to the flutter texture.
 class FlutterMetalTexture: NSObject, FlutterTexture {
     // Source image data buffer for generating the texture.
-    var sourceImageBuf: CVMetalTexture?
+    // var sourceImageBuf: CVMetalTexture?
     
     // Render target texture object.
     // Holds the rendered image data, is passed to shaders when drawing.
@@ -23,9 +23,12 @@ class FlutterMetalTexture: NSObject, FlutterTexture {
     var flutterTextureId: Int64 = 0
     
     // Initialize texture.
-    init(device: MTLDevice, textureCache: CVMetalTextureCache!, width: Int, height: Int) {
+    init(pixelBuf: CVPixelBuffer, metalTexture: MTLTexture) {
         // FlutterTexture init.
         super.init()
+        let unmanagedPixelBuffer: Unmanaged<CVPixelBuffer> = Unmanaged.passRetained(pixelBuf)
+        self.pixelBuf = unmanagedPixelBuffer
+        self.metalTexture = metalTexture
         
         // Provides a framebuffer object suitable for sharing across process boundaries.
         // The underlying surface for the created metal texture source pixel buffer.
@@ -38,8 +41,7 @@ class FlutterMetalTexture: NSObject, FlutterTexture {
         else {
             fatalError("Failed to create IOSurface buffer for sharing framebuffer and texture data across multiple processes.")
         }
-        
-        // Create the metal texture source pixel buffer.
+        //Create the metal texture source pixel buffer.
         guard CVPixelBufferCreateWithIOSurface(
             kCFAllocatorDefault,
             ioSurface,
@@ -49,7 +51,7 @@ class FlutterMetalTexture: NSObject, FlutterTexture {
             fatalError("Failed to create CVPixelBuffer")
         }
         
-        // Create the result Metal texture with the associated source pixel buffer linked to it.
+        //Create the result Metal texture with the associated source pixel buffer linked to it.
         guard CVMetalTextureCacheCreateTextureFromImage(
             kCFAllocatorDefault,
             textureCache,
@@ -64,8 +66,10 @@ class FlutterMetalTexture: NSObject, FlutterTexture {
         
         // Get the metal texture object.
         // This is the texture passed to the shaders when rendering.
-        self.metalTexture = CVMetalTextureGetTexture(self.sourceImageBuf!)
+        // self.metalTexture = CVMetalTextureGetTexture(self.sourceImageBuf!)
     }
+    
+    
     
     // Copies the pixel buffer contents to the flutter texture.
     func copyPixelBuffer() -> Unmanaged<CVPixelBuffer>? {
@@ -74,5 +78,15 @@ class FlutterMetalTexture: NSObject, FlutterTexture {
         } else {
             return nil
         }
+    }
+    
+    func onTextureUnregistered(_ texture: any FlutterTexture) {
+        NSLog(texture.description)
+    }
+    
+    func dispose() {
+        pixelBuf?.release()
+        pixelBuf = nil
+        
     }
 }
