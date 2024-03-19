@@ -66,14 +66,12 @@ class _CubeToTextureState extends State<CubeToTexture>
 
   // Create the communication channel to the native code.
   static const MethodChannel _channel = MethodChannel('VPTTextureRender');
-  static const EventChannel _eventChannel =
-      EventChannel('VPTTextureRender/events');
 
   // Called after initialization.
   @override
   void initState() {
     // Create the native Metal backed flutter texture.
-    createFlutterTextureStream();
+    createFlutterTexture();
 
     super.initState();
   }
@@ -193,15 +191,15 @@ class _CubeToTextureState extends State<CubeToTexture>
   }
 
   // Creates a flutter texture and stores the texture id got from the created flutter texture.
-  Future<void> createFlutterTextureStream() async {
+  Future<void> createFlutterTexture() async {
+    final textureId = await _channel.invokeMethod("createFlutterTexture",
+        {"width": _textureWidth, "height": _textureHeight});
     // The flutter texture is backed by a native platform dependent texture, that is registered
     // on the native backend to the flutter texture registry.
-    _eventChannel.receiveBroadcastStream().listen((textureId) {
-      // Store received texture id from the flutter texture registry.
-      setState(() {
-        _flutterTextureId = textureId;
-      });
+    setState(() {
+      _flutterTextureId = textureId;
     });
+    print("Texture ID: $_flutterTextureId");
   }
 
   Future<void> load() async {
