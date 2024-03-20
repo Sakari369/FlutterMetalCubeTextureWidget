@@ -18,7 +18,7 @@ let FLUTTER_PLUGIN_NAME = "VPTTextureRender"
 class VPTVideoRenderer {
 
     // The ID for the texture that will be produced. Placeholder type for compilation.
-    private var textureID: Int64 = 0
+    private var textureID: Int64 = -1
     
     // Reference to main flutter view controller.
     let flutterViewController: FlutterViewController
@@ -53,7 +53,6 @@ class VPTVideoRenderer {
     // Render the contents of the texture.
     @objc func render(displayLink: CADisplayLink) {
         self.renderer.render()
-
         // Notify that the texture was updated.
         if let textureId = self.flutterTexture?.flutterTextureId {
             self.flutterTextureRegistry!.textureFrameAvailable(textureId)
@@ -82,7 +81,7 @@ class VPTVideoRenderer {
                 width = args?["width"] as! Int
                 height = args?["height"] as! Int
             }
-            
+            NSLog("Texture Cache \(self.session.textureCache.debugDescription)")
             // The texture contents are first rendered on the metal side, then copied to the flutter
             // texture widget for displaying.
             // This results in a extra copy phase, but I guess there is no way around it.
@@ -92,14 +91,13 @@ class VPTVideoRenderer {
             
             // The flutter texture needs to be registered to the flutter texture registry in order
             // to use it from the flutter side.
-            guard let registeredTextureId = self.flutterTextureRegistry?.register(texture) else {
-                fatalError("Failed registering texture to Flutter registry")
+            DispatchQueue.main.async {
+                guard let registeredTextureId = self.flutterTextureRegistry?.register(texture) else {
+                    fatalError("Failed registering texture to Flutter registry")
+                }
+                // Assign received texture id from flutter, this is passed to the flutter Texture widget for displaying.
+                texture.flutterTextureId = registeredTextureId
             }
-            NSLog("RegisteredTextureId \(registeredTextureId)")
-            
-            // Assign received texture id from flutter, this is passed to the flutter Texture widget for displaying.
-            texture.flutterTextureId = registeredTextureId
-            
             NSLog("createFlutterTexture :: Texture created with size \(width)*\(height), flutterTextureId = \(texture.flutterTextureId)")
             
             self.flutterTexture = texture

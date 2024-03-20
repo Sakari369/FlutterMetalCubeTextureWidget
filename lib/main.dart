@@ -61,8 +61,8 @@ class _CubeToTextureState extends State<CubeToTexture>
   int? _flutterTextureId;
 
   // Dimensions of the texture for render results.
-  final int _textureWidth = 720;
-  final int _textureHeight = 720;
+  final int _textureWidth = 1080;
+  final int _textureHeight = 1920;
 
   // Create the communication channel to the native code.
   static const MethodChannel _channel = MethodChannel('VPTTextureRender');

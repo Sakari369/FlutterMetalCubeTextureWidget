@@ -18,12 +18,10 @@ public protocol VPTVideoSessionDelegate {
      Camera session did receive a new frame and converted it to an array of Metal textures. For instance, if the RGB pixel format was selected, the array will have a single texture, whereas if YCbCr was selected, then there will be two textures: the Y texture at index 0, and CbCr texture at index 1 (following the order in a sample buffer).
      
      - parameter session:                   Session that triggered the update
-     - parameter withPixelBuffer                           Pixel Buffer used to convert texture to FlutterTexture
-     - parameter textureCache:              Test
      - parameter didReceiveFrameAsTextures: Frame converted to an array of Metal textures
      - parameter withTimestamp:             Frame timestamp in seconds
      */
-    func vptVideoSession(_ session: VPTVideoSession, withPixelBuffer: CVPixelBuffer, textureCache: CVMetalTextureCache, didReceiveFrameAsTextures: [MTLTexture], withTimestamp: Double)
+    func vptVideoSession(_ session: VPTVideoSession, didRecieveFrameAsTextures: [MTLTexture], withTimestamp: Double )
     
     /**
      Camera session did update capture state
@@ -142,7 +140,7 @@ public final class VPTVideoSession: NSObject {
 #if arch(i386) || arch(x86_64)
 #else
     /// Texture cache we will use for converting frame images to textures
-    internal var textureCache: CVMetalTextureCache?
+    public var textureCache: CVMetalTextureCache?
 #endif
 
     /// `MTLDevice` we need to initialize texture cache
@@ -348,14 +346,8 @@ extension VPTVideoSession: AVCaptureVideoDataOutputSampleBufferDelegate {
     
     public func captureOutput(_ captureOutput: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         do {
-            
-            // Check if the sampleBuffer contains video data
-            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-                fatalError("Failed to extract pixel buffer from sample buffer.")
-            }
-            
             guard let textureCache = textureCache else {
-                fatalError("No pixelBuffer or textureCache")
+                throw VPTVideoSessionError.failedToAddCaptureOutput
             }
             
             var textures: [MTLTexture]!
@@ -369,12 +361,14 @@ extension VPTVideoSession: AVCaptureVideoDataOutputSampleBufferDelegate {
                 textures = [textureY, textureCbCr]
             }
             let timestamp = try self.timestamp(sampleBuffer: sampleBuffer)
-            delegate?.vptVideoSession(self, withPixelBuffer: pixelBuffer, textureCache: textureCache, didReceiveFrameAsTextures: textures, withTimestamp: timestamp)
+            delegate?.vptVideoSession(self, didRecieveFrameAsTextures: textures, withTimestamp: timestamp)
         }
         catch let error as VPTVideoSessionError {
+            NSLog("error")
             self.handleError(error)
         }
         catch {
+            NSLog("error1")
             /**
              * We only throw `VPTVideoSessionError` errors.
              */
