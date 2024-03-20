@@ -69,6 +69,7 @@ class FlutterMetalTexture: NSObject, FlutterTexture {
     
     // Copies the pixel buffer contents to the flutter texture.
     func copyPixelBuffer() -> Unmanaged<CVPixelBuffer>? {
+        NSLog(self.pixelBuf.debugDescription)
         if let pixelBuf = self.pixelBuf?.takeUnretainedValue() {
             return Unmanaged.passRetained(pixelBuf)
         } else {

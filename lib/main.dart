@@ -61,8 +61,8 @@ class _CubeToTextureState extends State<CubeToTexture>
   int? _flutterTextureId;
 
   // Dimensions of the texture for render results.
-  final int _textureWidth = 720;
-  final int _textureHeight = 720;
+  final int _textureWidth = 1080;
+  final int _textureHeight = 1920;
 
   // Create the communication channel to the native code.
   static const MethodChannel _channel = MethodChannel('VPTTextureRender');
@@ -91,7 +91,6 @@ class _CubeToTextureState extends State<CubeToTexture>
   // with controls and UI elements to support it.
   Widget triangleTextureView() {
     var flutterTextureId = _flutterTextureId;
-
     return Scaffold(
         backgroundColor: const Color(appBgColor),
         body: Container(
@@ -122,7 +121,11 @@ class _CubeToTextureState extends State<CubeToTexture>
                       child: SizedBox(
                           width: _textureWidth.toDouble(),
                           height: _textureHeight.toDouble(),
-                          child: Texture(textureId: flutterTextureId!)),
+                          child: Container(
+                              decoration: BoxDecoration(
+                                  border:
+                                      Border.all(color: Colors.red, width: 1)),
+                              child: Texture(textureId: flutterTextureId!))),
                     ),
                   ),
 
@@ -189,15 +192,14 @@ class _CubeToTextureState extends State<CubeToTexture>
 
   // Creates a flutter texture and stores the texture id got from the created flutter texture.
   Future<void> createFlutterTexture() async {
+    final textureId = await _channel.invokeMethod("createFlutterTexture",
+        {"width": _textureWidth, "height": _textureHeight});
     // The flutter texture is backed by a native platform dependent texture, that is registered
     // on the native backend to the flutter texture registry.
-    var textureId = await _channel.invokeMethod("createFlutterTexture",
-        {"width": _textureWidth, "height": _textureHeight});
-
-    // Store received texture id from the flutter texture registry.
     setState(() {
       _flutterTextureId = textureId;
     });
+    print("Texture ID: $_flutterTextureId");
   }
 
   Future<void> load() async {

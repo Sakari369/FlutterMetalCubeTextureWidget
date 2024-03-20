@@ -47,7 +47,7 @@ class TextureRenderer: NSObject {
     var clock = ContinuousClock()
     var lastInstant:ContinuousClock.Instant = ContinuousClock.now
     
-    init?(metalDevice: MTLDevice) {
+    init(metalDevice: MTLDevice) {
         self.device = metalDevice
         self.pipelineState = nil // Make pipelineState optional in your class definition
 
@@ -58,34 +58,32 @@ class TextureRenderer: NSObject {
         pipelineDescriptor.depthAttachmentPixelFormat = .invalid
         
         /**
-         *  Vertex function to map the texture to the view controller's view
-         */
-        pipelineDescriptor.vertexFunction = device.makeDefaultLibrary()?.makeFunction(name: "mapTexture")
-        
-        /**
-         *  Fragment function to display texture's pixels in the area bounded by vertices of `mapTexture` shader
-         */
-        pipelineDescriptor.fragmentFunction = device.makeDefaultLibrary()?.makeFunction(name: "displayTexture")
-        
-        // Clear the target texture before rendering to it.
-        self.renderPassDesc.colorAttachments[0].loadAction = .clear
-        self.renderPassDesc.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 0.0)
-
-        do {
-            self.pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
-        } catch {
-            print("Failed creating a render state pipeline. Can't render the texture without one.")
-            return nil // If the pipeline state creation fails, abort initialization
-        }
-        
-        /**
           initializes render pipeline state with a default vertex function mapping texture to the view's frame and a simple fragment function returning texture pixel's value.
           */
         guard
             let library = device.makeDefaultLibrary()
         else { return }
         
+        /**
+         *  Vertex function to map the texture to the view controller's view
+         */
+        pipelineDescriptor.vertexFunction = library.makeFunction(name: "mapTexture")
         
+        /**
+         *  Fragment function to display texture's pixels in the area bounded by vertices of `mapTexture` shader
+         */
+        pipelineDescriptor.fragmentFunction = library.makeFunction(name: "displayTexture")
+        
+        // Clear the target texture before rendering to it.
+//        self.renderPassDesc.colorAttachments[0].loadAction = .clear
+//        self.renderPassDesc.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 0.0)
+
+        do {
+            self.pipelineState = try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
+        } catch {
+            fatalError("Failed creating a render state pipeline. Can't render the texture without one.")
+            // If the pipeline state creation fails, abort initialization
+        }
 
         guard let commandQueue = self.device.makeCommandQueue(maxCommandBufferCount: 10)
         else {
@@ -106,61 +104,81 @@ class TextureRenderer: NSObject {
             return
         }
         
+        // Setup perf log
         let timeNow = self.clock.now
         let frameDuration = self.lastInstant.duration(to: timeNow)
         let frameTimeUs = frameDuration.components.attoseconds / 1_000_000_000_000
         let fps:Float = Float(1_000_000 / frameTimeUs)
-        
         print("frametime = \(frameTimeUs) fps = \(fps)")
         
         // Create the command buffer for this frame.
         _ = semaphore.wait(timeout: DispatchTime.distantFuture)
 
 
-         autoreleasepool {
-             guard
-                 let texture = renderTargetTexture,
-                 let commandBuffer = commandQueue?.makeCommandBuffer()
-             else {
-                 _ = semaphore.signal()
-                 fatalError("Could not create command buffer")
-             }
-             // Create command encoder for this frame.
-             guard
-                let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDesc)
-             else {
-                _ = semaphore.signal()
-                fatalError("Could not create command encoder")
-            }
-            
-            encoder.pushDebugGroup("RenderFrame")
-             guard let pipelineState = pipelineState
-             else {
-                 _ = semaphore.signal()
-                 fatalError("Could not create pipeline state");
-             }
-            encoder.setRenderPipelineState(pipelineState)
+         //autoreleasepool {
+         guard
+             let texture = renderTargetTexture,
+             let commandBuffer = commandQueue?.makeCommandBuffer()
+         else {
+             _ = semaphore.signal()
+             fatalError("Could not create command buffer")
+         }
+         // Create command encoder for this frame.
+         guard
+            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDesc)
+         else {
+            _ = semaphore.signal()
+            fatalError("Could not create command encoder")
+        }
+        
+        encoder.pushDebugGroup("RenderFrame")
+         guard let pipelineState = pipelineState
+         else {
+             _ = semaphore.signal()
+             fatalError("Could not create pipeline state");
+         }
+        encoder.setRenderPipelineState(pipelineState)
 
-            // Draw the texture to the screen.
-            encoder.setFragmentTexture(texture, index: 0)
-            encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: 1)
-            
-            // End encoding rendering commands for this frame.
-            encoder.popDebugGroup()
-            encoder.endEncoding()
-            
-            commandBuffer.addScheduledHandler { [weak self] (buffer) in
-                guard 
-                    let unwrappedSelf = self 
-                else { return }
-                    //unwrappedSelf.didRenderTexture(texture, withCommandBuffer: buffer, device: device)
-                unwrappedSelf.semaphore.signal()
-            }
-            // Commit the command buffer to the GPU.
-            commandBuffer.commit()
+        // Draw the texture to the screen.
+        encoder.setFragmentTexture(texture, index: 0)
+        encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4, instanceCount: 1)
+        
+        // End encoding rendering commands for this frame.
+        encoder.popDebugGroup()
+        encoder.endEncoding()
+        
+        commandBuffer.addScheduledHandler { [weak self] (buffer) in
+            guard 
+                let unwrappedSelf = self 
+            else { return }
+                //unwrappedSelf.didRenderTexture(texture, withCommandBuffer: buffer, device: device)
+            unwrappedSelf.semaphore.signal()
+        }
+        // Commit the command buffer to the GPU.
+        commandBuffer.commit()
 
-            self.elapsedFrames += 1;
-            self.lastInstant = timeNow
-            }
-    }
+        self.elapsedFrames += 1;
+        self.lastInstant = timeNow
+        }
+    //}
 }
+
+
+extension TextureRenderer: VPTVideoSessionDelegate {
+    func vptVideoSession(_ session: VPTVideoSession, didRecieveFrameAsTextures textures: [MTLTexture], withTimestamp: Double) {
+        NSLog(String(textures[0].description))
+        self.renderTargetTexture = textures[0]
+     }
+    
+     func vptVideoSession(_ session: VPTVideoSession, didUpdateState state: VPTVideoSessionState, error: VPTVideoSessionError?) {
+         session.frameOrientation = .portrait
+         if error == .captureSessionRuntimeError {
+             /**
+              *  In this app we are going to ignore capture session runtime errors
+              */
+             //self.session.start()
+         }
+        
+         NSLog("Session changed state to \(state) with error: \(error?.localizedDescription ?? "None") \(String(describing: error?.isStreamingError())).")
+     }
+ }
