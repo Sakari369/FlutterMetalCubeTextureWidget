@@ -12,5 +12,5 @@ Works on macOS and iOS targets.
 
 ```
 flutter pub get
-flutter run -d (macos|ios)
+flutter run
 ```
