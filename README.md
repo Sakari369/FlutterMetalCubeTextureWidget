@@ -12,10 +12,5 @@ Works on macOS and iOS targets.
 
 ```
 flutter pub get
-flutter run
+flutter run -d (macos|ios)
 ```
-
-## Jank issues on Flutter < 3.8
-
-As of current moment, with Flutter 3.7.1 there is noticeable jank with the Flutter Texture Widget.
-Updating to the master branch fixed this issue.
