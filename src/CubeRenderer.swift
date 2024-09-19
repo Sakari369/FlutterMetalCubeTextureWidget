@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Sumo Apps.
+// Copyright (c) 2023 Sakari Lehtonen.
 //
 // Renders an animated cube with Metal to a texture.
 

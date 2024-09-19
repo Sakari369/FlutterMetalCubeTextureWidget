@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Sumo Apps.
+// Copyright (C) 2023 Sakari Lehtonen.
 
 // Application implementing native Metal rendering to a
 // Flutter texture. Implements simple interactivity between
@@ -195,7 +195,7 @@ class _CubeToTextureState extends State<CubeToTexture> with TickerProviderStateM
                                     alignment: Alignment(0.25, -0.83),
 
                                     child:
-                                    Text('SumoRenderer',
+                                    Text('MetalRenderer',
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontSize: 39,
