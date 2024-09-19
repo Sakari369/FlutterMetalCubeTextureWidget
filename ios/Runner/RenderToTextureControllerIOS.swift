@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Sumo Apps.
+// Copyright (c) 2023 Sakari Lehtonen.
 
 // Test case for rendering with Metal code to a native metal texture, and setting up
 // display inside a Flutter Texture widget.
